@@ -1,0 +1,22 @@
+{
+  "name": "update-links",
+  "version": "0.1.0",
+  "description": "Normative references",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plehegar/normative-references.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/plehegar/normative-references/issues"
+  },
+  "homepage": "https://github.com/plehegar/normative-references#readme",
+  "dependencies": {
+    "jsdom": "^11.4.0"
+  }
+}
