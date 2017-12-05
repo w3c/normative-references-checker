@@ -18,8 +18,9 @@ function logArgs() {
 var currentlyRunning = {};
 
 var AUTHORIZED_URLS = [
-  new RegExp("https?://www.w3.org/TR/"),
-  new RegExp("https?://w3c.github.io/"),
+  new RegExp("^https?://www.w3.org/TR/"),
+  new RegExp("^https?://[-a-zA-Z0-9]+.github.io/"),
+  new RegExp("^https?://drafts.csswg.org/")
 ]
 
 function isAuthorized(url) {
@@ -29,28 +30,42 @@ function isAuthorized(url) {
   return false;
 }
 
-app.get('/norm', function (req, res, next) {
+app.get('/', function (req, res, next) {
   if (!req.query.url) {
-    res.send("<p>missing url parameter</p>");
+    logArgs("[missing url]");
+    res.status(400).send("<p>missing url parameter</p>");
   } else {
       var inputURL = req.query.url;
       var originURL = inputURL;
-      logArgs("[log] " + inputURL);
+      
       if (!isAuthorized(inputURL)) {
-        res.send("<p>unauthorized url parameter</p>");
+        logArgs("[unauthorized] " + inputURL);
+        res.status(403).send("<p>unauthorized url parameter</p>");
         return;
       }
-      // convenience
-      if (inputURL.startsWith("http://www.w3.org/")) {
-        inputURL = "https://www.w3.org/" + inputURL.substring("http://www.w3.org/".length);
+      // use https://
+      if (inputURL.startsWith("http://")) {
+        inputURL = "https://" + inputURL.substring("http://".length);
       }
-      
+      if (!inputURL.startsWith("https://")) { // just in case...
+        logArgs("[unauthorized] " + inputURL);
+        res.status(403).send("<p>unauthorized url parameter</p>");
+        return;
+      }
+      if (inputURL in currentlyRunning) {
+        logArgs("[ongoing] " + inputURL);
+        res.status(409).send("<p>duplicate request?</p>");
+        return;
+      }
+      currentlyRunning[inputURL] = true;
+      logArgs("[get] " + inputURL);
       JSDOM.fromURL(inputURL).then(dom => {
         return dom.window.document;
       }).then(document => {
         var script = document.querySelector("script.remove");
         if (script !==  null) {
           inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
+          logArgs("[respec] " + inputURL);
           return JSDOM.fromURL(inputURL).then(dom => {
             return dom.window.document;
           });
@@ -66,10 +81,19 @@ app.get('/norm', function (req, res, next) {
           originURL: originURL,
           unknownLinks: lists.unknown,
           knownLinks: lists.known
-        })
+        });
         res.send(outputHTML);
+      }).catch(e => {
+        logArgs("[error] " + e.name);
+        if (e.statusCode) {
+          res.status(e.statusCode).send("<p>Received " + e.statusCode);          
+        } else {
+          res.status(500).send("<p>Received " + e.name);
+        }
+      }).then(function () {
+        delete currentlyRunning[inputURL];
       });
-  }
+    }
 });
 
 var port = process.env.PORT || 5000;
