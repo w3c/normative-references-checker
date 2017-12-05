@@ -31,6 +31,10 @@ function isAuthorized(url) {
 }
 
 app.get('/', function (req, res, next) {
+  res.send("<form method=get action='/check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></formM>");
+});
+
+app.get('/check', function (req, res, next) {
   if (!req.query.url) {
     logArgs("[missing url]");
     res.status(400).send("<p>missing url parameter</p>");
@@ -84,10 +88,11 @@ app.get('/', function (req, res, next) {
         });
         res.send(outputHTML);
       }).catch(e => {
-        logArgs("[error] " + e.name);
         if (e.statusCode) {
-          res.status(e.statusCode).send("<p>Received " + e.statusCode);          
+          logArgs("[error] " + e.statusCode + " " + e.name);
+          res.status(e.statusCode).send("<p>Received " + e.name + " " + e.statusCode);          
         } else {
+          logArgs("[error] " + e.name);
           res.status(500).send("<p>Received " + e.name);
         }
       }).then(function () {
