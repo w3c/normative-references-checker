@@ -1,10 +1,11 @@
 {
-  "name": "update-links",
+  "name": "normative-references",
   "version": "0.1.0",
   "description": "Normative references",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node index.js",
+    "start": "node serve.js"
   },
   "repository": {
     "type": "git",
