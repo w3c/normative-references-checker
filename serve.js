@@ -9,9 +9,26 @@ const format = require("./lib/views/default.js");
 const { JSDOM } = jsdom;
 
 function logArgs() {
-  var args = arguments;
+  var args = [ "[log]" ];
+  args = args.concat(Array.from(arguments));
   process.nextTick(function() {
     console.log.apply(console, args);
+  });
+}
+
+function warnArgs() {
+  var args = [ "[warn]" ];
+  args = args.concat(Array.from(arguments));
+  process.nextTick(function() {
+    console.warn.apply(console, args);
+  });
+}
+
+function errArgs() {
+  var args = [ "[err]" ];
+  args = args.concat(Array.from(arguments));
+  process.nextTick(function() {
+    console.error.apply(console, args);
   });
 }
 
@@ -30,20 +47,22 @@ function isAuthorized(url) {
   return false;
 }
 
+app.enable('trust proxy');
+
 app.get('/', function (req, res, next) {
   res.send("<form method=get action='/check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></formM>");
 });
 
 app.get('/check', function (req, res, next) {
   if (!req.query.url) {
-    logArgs("[missing url]");
+    warnArgs("missing url");
     res.status(400).send("<p>missing url parameter</p>");
   } else {
       var inputURL = req.query.url;
       var originURL = inputURL;
       
       if (!isAuthorized(inputURL)) {
-        logArgs("[unauthorized] " + inputURL);
+        warnArgs("unauthorized: " + req.ip + " " + inputURL);
         res.status(403).send("<p>unauthorized url parameter</p>");
         return;
       }
@@ -52,24 +71,23 @@ app.get('/check', function (req, res, next) {
         inputURL = "https://" + inputURL.substring("http://".length);
       }
       if (!inputURL.startsWith("https://")) { // just in case...
-        logArgs("[unauthorized] " + inputURL);
+        warnArgs("unauthorized: " + req.ip + " " + inputURL);
         res.status(403).send("<p>unauthorized url parameter</p>");
         return;
       }
       if (inputURL in currentlyRunning) {
-        logArgs("[ongoing] " + inputURL);
+        logArgs("already running: " + inputURL);
         res.status(409).send("<p>duplicate request?</p>");
         return;
       }
       currentlyRunning[inputURL] = true;
-      logArgs("[get] " + inputURL);
+      logArgs("processing " + inputURL);
       JSDOM.fromURL(inputURL).then(dom => {
         return dom.window.document;
       }).then(document => {
-        var script = document.querySelector("script.remove");
-        if (script !==  null) {
+        if (links.isRespec(document)) {
           inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
-          logArgs("[respec] " + inputURL);
+          logArgs("spec-generator: " + inputURL);
           return JSDOM.fromURL(inputURL).then(dom => {
             return dom.window.document;
           });
@@ -78,21 +96,22 @@ app.get('/check', function (req, res, next) {
       }).then(document => {
         var title = document.querySelector("head title").textContent;
         var lists = links.getLinks(document, inputURL);
-      
         var outputHTML = format.toHTML({
           title: title,
           inputURL: inputURL,
           originURL: originURL,
+          foundNormativeSection: lists.foundNormativeSection,
+          isBikeshed: links.isBikeshed(document),
           unknownLinks: lists.unknown,
           knownLinks: lists.known
         });
         res.send(outputHTML);
       }).catch(e => {
         if (e.statusCode) {
-          logArgs("[error] " + e.statusCode + " " + e.name);
+          errArgs(e.statusCode + " " + e.name + ": " + inputURL);
           res.status(e.statusCode).send("<p>Received " + e.name + " " + e.statusCode);          
         } else {
-          logArgs("[error] " + e.name);
+          errArgs(e.name + ": " + inputURL);
           res.status(500).send("<p>Received " + e.name);
         }
       }).then(function () {
