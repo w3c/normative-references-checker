@@ -37,14 +37,12 @@ var currentlyRunning = {};
 var AUTHORIZED_URLS = [
   new RegExp("^https?://www.w3.org/TR/"),
   new RegExp("^https?://[-a-zA-Z0-9]+.github.io/"),
+  new RegExp("^https?://rawgit.com/"),
   new RegExp("^https?://drafts.csswg.org/")
 ]
 
 function isAuthorized(url) {
-  for (let index = 0; index < AUTHORIZED_URLS.length; index++) {
-    if (AUTHORIZED_URLS[index].test(url)) return true;
-  }
-  return false;
+  return AUTHORIZED_URLS.reduce((r, e) => r || e.test(url), false);
 }
 
 app.enable('trust proxy');
