@@ -48,7 +48,10 @@ function isAuthorized(url) {
 app.enable('trust proxy');
 
 app.get('/', function (req, res, next) {
-  res.send("<form method=get action='/check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></formM>");
+  res.send("<html lang=en><head><title>Normative references checker</title></head>"
+  + "<body><h1>Normative references checker</h1>"
+  + "<form method=get action='./check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></form>"
+  + "</body></html>");
 });
 
 app.get('/check', function (req, res, next) {
