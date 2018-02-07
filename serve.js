@@ -51,6 +51,7 @@ app.get('/', function (req, res, next) {
   res.send("<html lang=en><head><title>Normative references checker</title></head>"
   + "<body><h1>Normative references checker</h1>"
   + "<form method=get action='./check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></form>"
+  + "<hr><p><a href='https://github.com/plehegar/normative-references/'>GitHub</a></p>"
   + "</body></html>");
 });
 
