@@ -107,6 +107,7 @@ app.get('/check', function (req, res, next) {
           inputURL: inputURL,
           originURL: originURL,
           foundNormativeSection: lists.foundNormativeSection,
+          isRespec: links.isRespec(document),
           isBikeshed: links.isBikeshed(document),
           unknownLinks: lists.unknown,
           knownLinks: lists.known
