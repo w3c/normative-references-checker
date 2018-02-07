@@ -48,9 +48,13 @@ function isAuthorized(url) {
 app.enable('trust proxy');
 
 app.get('/', function (req, res, next) {
-  res.send("<html lang=en><head><title>Normative references checker</title></head>"
-  + "<body><h1>Normative references checker</h1>"
-  + "<form method=get action='./check'><input name=url type=text placeholder=URL size=40><button type=submit>Submit</button></form>"
+  res.end("<html lang=en><head><title>Normative references checker</title>"
+  + "<link rel='stylesheet' type='text/css' href='https://w3c.github.io/Guide/assets/main.css'>"
+  + "</head>"
+  + "<body><div><span class='logo'><a href='https://www.w3.org/'>"
+  + "<img src='https://www.w3.org/Icons/WWW/w3c_home_nb' alt='W3C' border='0' height='48' width='72'></a>"
+  + "</span><h1>Normative references checker</h1></div>"
+  + "<form method=get action='./check'<p><label for='url'>Enter the URL of the document to check:</label><br><input name=url id='url' type=text placeholder=URL size=80><button type=submit>Submit</button></form>"
   + "<hr><p><a href='https://github.com/plehegar/normative-references/'>GitHub</a></p>"
   + "</body></html>");
 });
@@ -109,14 +113,17 @@ app.get('/check', function (req, res, next) {
         });
         res.send(outputHTML);
       }).catch(e => {
+        var status = 500;
         if (e.statusCode) {
-          errArgs(e.statusCode + " " + e.name + ": " + inputURL);
-          res.status(e.statusCode).send("<p>Received " + e.name + " " + e.statusCode);          
-        } else {
-          errArgs(e.name + ": " + inputURL);
-          res.status(500).send("<p>Received " + e.name);
+          status = e.statusCode;
+
         }
-      }).then(function () {
+        errArgs(status + " " + e.name + ": " + inputURL);
+        res.status(status)
+           .send("<html><title>Error</title><h1>Error " + status + "</h1>"
+           + "<p>Received "
+                  + e.name + " from <a href='" + inputURL + "'>" + inputURL + '</a>');
+  }).then(function () {
         delete currentlyRunning[inputURL];
       });
     }
