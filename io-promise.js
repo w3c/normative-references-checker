@@ -27,7 +27,7 @@
 //  })
 
 //  io.readJSON("myfile.json").then(function (data) {
-//   return res.text();
+//   do something with data;
 //  })
 
 //  io.fetch("http://www.example.org", { delay: 2 } ).then(function (res) {

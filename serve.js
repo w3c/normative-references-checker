@@ -3,6 +3,7 @@ var t0 = Date.now();
 
 var app = module.exports = express();
 const jsdom = require("jsdom");
+const io = require("./io-promise.js");
 const links = require("./lib/links.js");
 const format = require("./lib/views/default.js");
 
@@ -47,16 +48,22 @@ function isAuthorized(url) {
 
 app.enable('trust proxy');
 
+var FORM = null;
 app.get('/', function (req, res, next) {
-  res.end("<html lang=en><head><title>Normative references checker</title>"
-  + "<link rel='stylesheet' type='text/css' href='https://w3c.github.io/Guide/assets/main.css'>"
-  + "</head>"
-  + "<body><div><span class='logo'><a href='https://www.w3.org/'>"
-  + "<img src='https://www.w3.org/Icons/WWW/w3c_home_nb' alt='W3C' border='0' height='48' width='72'></a>"
-  + "</span><h1>Normative references checker</h1></div>"
-  + "<form method=get action='./check'<p><label for='url'>Enter the URL of the document to check:</label><br><input name=url id='url' type=text placeholder=URL size=80><button type=submit>Submit</button></form>"
-  + "<hr><p><a href='https://github.com/plehegar/normative-references/'>GitHub</a></p>"
-  + "</body></html>");
+  if (FORM === null) {
+    io.read('./docs/form.html').then(data => {
+      FORM = data;
+      res.send(FORM);
+    }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
+  } else {
+    res.send(FORM);
+  }
+});
+
+app.get('/doc', function (req, res, next) {
+  io.read('./docs/index.html').then(data => {
+      res.send(data);
+    }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
 });
 
 app.get('/check', function (req, res, next) {
@@ -119,6 +126,7 @@ app.get('/check', function (req, res, next) {
           status = e.statusCode;
 
         }
+        console.log(e);
         errArgs(status + " " + e.name + ": " + inputURL);
         res.status(status)
            .send("<html><title>Error</title><h1>Error " + status + "</h1>"
