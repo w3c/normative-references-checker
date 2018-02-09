@@ -1,0 +1,10 @@
+# URLs white list
+
+https://github.com/[^/]+/[^/]+/commits?/[^/]+
+https://github.com/[^/]+/[^/]+/issues/[^/]+
+https://github.com/[^/]+/[^/]+/pulls/[^/]+
+https?://www.w3.org/Consortium/.+
+https://www.w3.org/[0-9]+/Process-[0-9]+/
+https://www.w3.org/TR/
+
+
