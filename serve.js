@@ -73,7 +73,7 @@ app.get('/check', function (req, res, next) {
   } else {
       var inputURL = req.query.url;
       var originURL = inputURL;
-      var isReSpec = false;
+      var isRespec = false;
       
       if (!isAuthorized(inputURL)) {
         warnArgs("unauthorized: " + req.ip + " " + inputURL);
