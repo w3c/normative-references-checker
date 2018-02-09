@@ -93,7 +93,8 @@ app.get('/check', function (req, res, next) {
         res.status(409).send("<p>duplicate request?</p>");
         return;
       }
-      currentlyRunning[inputURL] = true;
+      originURL = inputURL;
+      currentlyRunning[originURL] = true;
       logArgs("processing " + inputURL);
       JSDOM.fromURL(inputURL).then(dom => {
         return dom.window.document;
@@ -133,7 +134,7 @@ app.get('/check', function (req, res, next) {
            + "<p>Received "
                   + e.name + " from <a href='" + inputURL + "'>" + inputURL + '</a>');
   }).then(function () {
-        delete currentlyRunning[inputURL];
+        delete currentlyRunning[originURL];
       });
     }
 });
