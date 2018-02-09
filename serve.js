@@ -73,6 +73,7 @@ app.get('/check', function (req, res, next) {
   } else {
       var inputURL = req.query.url;
       var originURL = inputURL;
+      var isReSpec = false;
       
       if (!isAuthorized(inputURL)) {
         warnArgs("unauthorized: " + req.ip + " " + inputURL);
@@ -100,6 +101,7 @@ app.get('/check', function (req, res, next) {
         return dom.window.document;
       }).then(document => {
         if (links.isRespec(document)) {
+          isRespec = true;
           inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
           logArgs("spec-generator: " + inputURL);
           return JSDOM.fromURL(inputURL).then(dom => {
@@ -115,7 +117,7 @@ app.get('/check', function (req, res, next) {
           inputURL: inputURL,
           originURL: "" + document.location,
           foundNormativeSection: lists.foundNormativeSection,
-          isRespec: links.isRespec(document),
+          isRespec: isRespec,
           isBikeshed: links.isBikeshed(document),
           unknownLinks: lists.unknown,
           knownLinks: lists.known
