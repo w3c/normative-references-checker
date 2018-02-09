@@ -109,11 +109,11 @@ app.get('/check', function (req, res, next) {
         return document;
       }).then(document => {
         var title = document.querySelector("head title").textContent;
-        var lists = links.getLinks(document, inputURL);
+        var lists = links.getLinks(document, "" + document.location);
         var outputHTML = format.toHTML({
           title: title,
           inputURL: inputURL,
-          originURL: originURL,
+          originURL: "" + document.location,
           foundNormativeSection: lists.foundNormativeSection,
           isRespec: links.isRespec(document),
           isBikeshed: links.isBikeshed(document),
