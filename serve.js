@@ -3,7 +3,7 @@ var t0 = Date.now();
 
 var app = module.exports = express();
 const jsdom = require("jsdom");
-const io = require("./io-promise.js");
+const io = require("./lib/utils/io-promise.js");
 const links = require("./lib/links.js");
 const format = require("./lib/views/default.js");
 
@@ -35,13 +35,18 @@ function errArgs() {
 
 var currentlyRunning = {};
 
-var AUTHORIZED_URLS = [
-  new RegExp("^https?://www.w3.org/TR/"),
-  new RegExp("^https?://[-a-zA-Z0-9]+.github.io/"),
-  new RegExp("^https?://rawgit.com/"),
-  new RegExp("^https?://drafts.csswg.org/")
-]
+var AUTHORIZED_URLS = [];
 
+io.read("./url-authorized.txt").then(data => {
+  data.split('\n').forEach(line => {
+    if (!(line.charAt(0) === '#')) {
+      line = line.trim();
+      if (line !== "") {
+        AUTHORIZED_URLS.push(new RegExp(line));
+      }
+    }
+  })
+})
 function isAuthorized(url) {
   return AUTHORIZED_URLS.reduce((r, e) => r || e.test(url), false);
 }
