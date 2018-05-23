@@ -65,8 +65,6 @@ exports.err = function(msg) {
   });
 }
 
-var instance_identifier = "" + Math.floor(Math.random() * 10000000);
-
 exports.install = function(app, options) {
   var path = '/monitor';
   if (options !== undefined) {
@@ -104,6 +102,7 @@ exports.install = function(app, options) {
       output += '\n' + logs[index];
     }
     res.set('Content-Type', 'text/plain');
+    res.set('Access-Control-Allow-Origin', '*');
     res.send(output);
     next();
   });
@@ -111,6 +110,7 @@ exports.install = function(app, options) {
   // simple way to check if the server is alive
   app.get(path + '/ping', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
+    res.set('Access-Control-Allow-Origin', '*');
     res.send('pong');
     next();
   });
@@ -118,6 +118,7 @@ exports.install = function(app, options) {
   // simple way to check if the server is alive
   app.get(path + '/usage', function (req, res, next) {
     res.set('Content-Type', 'application/json');
+    res.set('Access-Control-Allow-Origin', '*');
     var obj = process.memoryUsage();
     obj.uptime = process.uptime();
     obj.cpuUsage = process.cpuUsage();
