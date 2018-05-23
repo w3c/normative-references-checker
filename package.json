@@ -19,6 +19,7 @@
   "homepage": "https://github.com/plehegar/normative-references#readme",
   "dependencies": {
     "express": "^4.16.2",
+    "io-promise": "^1.0.0",
     "jsdom": "^11.4.0"
   }
 }

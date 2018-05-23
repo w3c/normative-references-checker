@@ -1,37 +1,14 @@
-var express = require("express");
-var t0 = Date.now();
+const express = require("express");
+const io = require("io-promise");
+const t0 = Date.now();
 
+const monitor  = require('./monitor.js');
 var app = module.exports = express();
 const jsdom = require("jsdom");
-const io = require("./lib/utils/io-promise.js");
 const links = require("./lib/links.js");
 const format = require("./lib/views/default.js");
 
 const { JSDOM } = jsdom;
-
-function logArgs() {
-  var args = [ "[log]" ];
-  args = args.concat(Array.from(arguments));
-  process.nextTick(function() {
-    console.log.apply(console, args);
-  });
-}
-
-function warnArgs() {
-  var args = [ "[warn]" ];
-  args = args.concat(Array.from(arguments));
-  process.nextTick(function() {
-    console.warn.apply(console, args);
-  });
-}
-
-function errArgs() {
-  var args = [ "[err]" ];
-  args = args.concat(Array.from(arguments));
-  process.nextTick(function() {
-    console.error.apply(console, args);
-  });
-}
 
 var currentlyRunning = {};
 
@@ -53,6 +30,8 @@ function isAuthorized(url) {
 
 app.enable('trust proxy');
 
+monitor.install(app);
+
 var FORM = null;
 app.get('/', function (req, res, next) {
   if (FORM === null) {
@@ -73,15 +52,15 @@ app.get('/doc', function (req, res, next) {
 
 app.get('/check', function (req, res, next) {
   if (!req.query.url) {
-    warnArgs("missing url");
+    monitor.warn("missing url");
     res.status(400).send("<p>missing url parameter</p>");
   } else {
       var inputURL = req.query.url;
       var originURL = inputURL;
       var isRespec = false;
-      
+
       if (!isAuthorized(inputURL)) {
-        warnArgs("unauthorized: " + req.ip + " " + inputURL);
+        monitor.warn("unauthorized: " + req.ip + " " + inputURL);
         res.status(403).send("<p>unauthorized url parameter</p>");
         return;
       }
@@ -90,25 +69,25 @@ app.get('/check', function (req, res, next) {
         inputURL = "https://" + inputURL.substring("http://".length);
       }
       if (!inputURL.startsWith("https://")) { // just in case...
-        warnArgs("unauthorized: " + req.ip + " " + inputURL);
+        monitor.warn("unauthorized: " + req.ip + " " + inputURL);
         res.status(403).send("<p>unauthorized url parameter</p>");
         return;
       }
       if (inputURL in currentlyRunning) {
-        logArgs("already running: " + inputURL);
+        monitor.log("already running: " + inputURL);
         res.status(409).send("<p>duplicate request?</p>");
         return;
       }
       originURL = inputURL;
       currentlyRunning[originURL] = true;
-      logArgs("processing " + inputURL);
+      monitor.log("processing " + inputURL);
       JSDOM.fromURL(inputURL).then(dom => {
         return dom.window.document;
       }).then(document => {
         if (links.isRespec(document)) {
           isRespec = true;
           inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
-          logArgs("spec-generator: " + inputURL);
+          monitor.log("spec-generator: " + inputURL);
           return JSDOM.fromURL(inputURL).then(dom => {
             return dom.window.document;
           });
@@ -142,9 +121,12 @@ app.get('/check', function (req, res, next) {
                   + e.name + " from <a href='" + inputURL + "'>" + inputURL + '</a>');
   }).then(function () {
         delete currentlyRunning[originURL];
+        next();
       });
     }
 });
+
+monitor.stats(app);
 
 var port = process.env.PORT || 5000;
 

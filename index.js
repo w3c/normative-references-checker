@@ -10,7 +10,7 @@
  [1] http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
 */
 
-const io = require('./io-promise');
+const io = require('io-promise');
 const jsdom = require("jsdom");
 const links = require("./lib/links.js");
 const format = require("./lib/views/default.js");
