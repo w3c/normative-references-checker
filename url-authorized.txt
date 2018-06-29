@@ -1,6 +1,7 @@
 # list of authorized URLs for this service
 
 ^https?://www.w3.org/TR/
+^https?://labs.w3.org/
 ^https?://[-a-zA-Z0-9]+.github.io/
 ^https?://rawgit.com/
 ^https?://drafts.csswg.org/
