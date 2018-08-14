@@ -30,6 +30,7 @@ function isAuthorized(url) {
 
 app.enable('trust proxy');
 
+monitor.setName("Normative reference checker");
 monitor.install(app);
 
 var FORM = null;

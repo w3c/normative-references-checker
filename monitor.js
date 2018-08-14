@@ -1,5 +1,6 @@
 // const monitor  = require('./monitor.js');
-// var app = express();
+// let app = express();
+// monitor.setName("MyService");
 // monitor.install(app, [options]);
 //
 // options.path - HTTP root path for the monitor, default is /monitor
@@ -15,11 +16,12 @@
 // and don't forget to use next() im between for each router/middleware
 // you'll then see those time info added to the log
 
-var request_current = 0;
-var request_total = 0;
+let request_current = 0;
+let request_total = 0;
+let name = "Generic Express Monitor";
 
-var logs = [];
-var MAX_ENTRIES = 50;
+let logs = [];
+let MAX_ENTRIES = 50;
 
 function add(msg) {
   if (logs.length === (MAX_ENTRIES * 2)) {
@@ -34,15 +36,19 @@ function getDate(msg) {
 }
 
 logStat = function(msg) {
-  var args = "[stat] " + msg;
+  let args = "[stat] " + msg;
   add(args);
   process.nextTick(function() {
     console.log(args);
   });
 }
 
+exports.setName = function(newName) {
+  name = newName;
+}
+
 exports.log = function(msg) {
-  var args = "[log] " + getDate(msg);
+  let args = "[log] " + getDate(msg);
   add(args);
   process.nextTick(function() {
     console.log(args);
@@ -50,7 +56,7 @@ exports.log = function(msg) {
 }
 
 exports.warn = function(msg) {
-  var args = "[warn] " + getDate(msg);
+  let args = "[warn] " + getDate(msg);
   add(args);
   process.nextTick(function() {
     console.warn(args);
@@ -58,7 +64,7 @@ exports.warn = function(msg) {
 }
 
 exports.err = function(msg) {
-  var args = "[err] " + getDate(msg);
+  let args = "[err] " + getDate(msg);
   add(args);
   process.nextTick(function() {
     console.error(args);
@@ -66,7 +72,7 @@ exports.err = function(msg) {
 }
 
 exports.install = function(app, options) {
-  var path = '/monitor';
+  let path = '/monitor';
   if (options !== undefined) {
     if (options.path !== undefined) {
       path = options.path;
@@ -91,9 +97,9 @@ exports.install = function(app, options) {
     process.nextTick(function() {
       console.warn("[monitor] " + getDate("/logs " + req.ip));
     });
-    var output = "";
-    var begin = logs.length - MAX_ENTRIES;
-    var end = logs.length;
+    let output = "";
+    let begin = logs.length - MAX_ENTRIES;
+    let end = logs.length;
     if (begin < 0) {
       begin = 0;
     }
@@ -109,17 +115,19 @@ exports.install = function(app, options) {
 
   // simple way to check if the server is alive
   app.get(path + '/ping', function (req, res, next) {
-    res.set('Content-Type', 'text/plain');
+    res.set('Content-Type', 'application/json');
     res.set('Access-Control-Allow-Origin', '*');
-    res.send('pong');
+    res.send('{"status":"ok","name":"' + name + '"}');
     next();
   });
 
-  // simple way to check if the server is alive
+  // another way to check if the server is alive, with more data
   app.get(path + '/usage', function (req, res, next) {
     res.set('Content-Type', 'application/json');
     res.set('Access-Control-Allow-Origin', '*');
-    var obj = process.memoryUsage();
+    let obj = process.memoryUsage();
+    obj.status = "ok";
+    obj.name = name;
     obj.uptime = process.uptime();
     obj.cpuUsage = process.cpuUsage();
     obj.requests = { total: request_total, current: request_current };
@@ -129,16 +137,15 @@ exports.install = function(app, options) {
 }
 
 exports.stats = function(app, options) {
-  var path = '/monitor';
+  let path = '/monitor';
   if (options !== undefined) {
     if (options.path !== undefined) {
       path = options.path;
     }
   }
 
-  // grabs the logs easily
   app.use(function (req, res, next) {
-    var log = req.method + " " + req.originalUrl;
+    let log = req.method + " " + req.originalUrl;
     if (req.get("traceparent") !== undefined) {
       log = "[" + req.get("traceparent") + "] " + log;
     }
