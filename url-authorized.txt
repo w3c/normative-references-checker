@@ -5,4 +5,5 @@
 ^https?://[-a-zA-Z0-9]+.github.io/
 ^https?://rawgit.com/
 ^https?://drafts.csswg.org/
+^https?://drafts.fxtf.org/
 
