@@ -105,22 +105,22 @@ app.get('/check', function (req, res, next) {
           isRespec: isRespec,
           isBikeshed: links.isBikeshed(document),
           unknownLinks: lists.unknown,
-          knownLinks: lists.known
+          knownLinks: lists.known,
+          deprecatedLinks: lists.deprecated
         });
         res.send(outputHTML);
       }).catch(e => {
-        var status = 500;
+        let status = 500;
         if (e.statusCode) {
           status = e.statusCode;
-
         }
-        console.log(e);
+        console.error(e);
         errArgs(status + " " + e.name + ": " + inputURL);
         res.status(status)
            .send("<html><title>Error</title><h1>Error " + status + "</h1>"
            + "<p>Received "
                   + e.name + " from <a href='" + inputURL + "'>" + inputURL + '</a>');
-  }).then(function () {
+      }).then(function () {
         delete currentlyRunning[originURL];
         next();
       });
