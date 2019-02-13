@@ -17,7 +17,7 @@ const format = require("./lib/views/default.js");
 
 const { JSDOM } = jsdom;
 
-var inputURL = process.argv[2];
+let inputURL = process.argv[2];
 
 if (inputURL === undefined) {
   inputURL = "https://www.w3.org/TR/hr-time/";
@@ -27,7 +27,7 @@ if (inputURL === undefined) {
 const originURL = inputURL; // in case we do respec processing
 
 // output file
-var outputFile = process.argv[3];
+let outputFile = process.argv[3];
 
 if (outputFile === undefined) {
   outputFile = "report.html";
@@ -40,7 +40,7 @@ if (inputURL.startsWith("http://www.w3.org/")) {
 JSDOM.fromURL(inputURL).then(dom => {
   return dom.window.document;
 }).then(document => {
-  var script = document.querySelector("script.remove");
+  let script = document.querySelector("script.remove");
   if (script !==  null) {
     inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
     return JSDOM.fromURL(inputURL).then(dom => {
@@ -49,10 +49,10 @@ JSDOM.fromURL(inputURL).then(dom => {
   }
   return document;
 }).then(document => {
-  var title = document.querySelector("head title").textContent;
-  var lists = links.getLinks(document, inputURL);
+  let title = document.querySelector("head title").textContent;
+  let lists = links.getLinks(document, inputURL);
 
-  var outputHTML = format.toHTML({
+  let outputHTML = format.toHTML({
     title: title,
     inputURL: inputURL,
     originURL: originURL,

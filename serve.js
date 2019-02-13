@@ -3,16 +3,16 @@ const io = require("io-promise");
 const t0 = Date.now();
 
 const monitor  = require('./monitor.js');
-var app = module.exports = express();
+let app = module.exports = express();
 const jsdom = require("jsdom");
 const links = require("./lib/links.js");
 const format = require("./lib/views/default.js");
 
 const { JSDOM } = jsdom;
 
-var currentlyRunning = {};
+let currentlyRunning = {};
 
-var AUTHORIZED_URLS = [];
+let AUTHORIZED_URLS = [];
 
 io.read("./url-authorized.txt").then(data => {
   data.split('\n').forEach(line => {
@@ -33,7 +33,7 @@ app.enable('trust proxy');
 monitor.setName("Normative reference checker");
 monitor.install(app);
 
-var FORM = null;
+let FORM = null;
 app.get('/', function (req, res, next) {
   if (FORM === null) {
     io.read('./docs/form.html').then(data => {
@@ -56,9 +56,9 @@ app.get('/check', function (req, res, next) {
     monitor.warn("missing url");
     res.status(400).send("<p>missing url parameter</p>");
   } else {
-      var inputURL = req.query.url;
-      var originURL = inputURL;
-      var isRespec = false;
+      let inputURL = req.query.url;
+      let originURL = inputURL;
+      let isRespec = false;
 
       if (!isAuthorized(inputURL)) {
         monitor.warn("unauthorized: " + req.ip + " " + inputURL);
@@ -95,9 +95,9 @@ app.get('/check', function (req, res, next) {
         }
         return document;
       }).then(document => {
-        var title = document.querySelector("head title").textContent;
-        var lists = links.getLinks(document, "" + document.location);
-        var outputHTML = format.toHTML({
+        let title = document.querySelector("head title").textContent;
+        let lists = links.getLinks(document, "" + document.location);
+        let outputHTML = format.toHTML({
           title: title,
           inputURL: inputURL,
           originURL: "" + document.location,
@@ -129,7 +129,7 @@ app.get('/check', function (req, res, next) {
 
 monitor.stats(app);
 
-var port = process.env.PORT || 5000;
+let port = process.env.PORT || 5000;
 
 app.listen(port, function() {
 
