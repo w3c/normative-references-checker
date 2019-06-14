@@ -106,7 +106,8 @@ app.get('/check', function (req, res, next) {
           isBikeshed: links.isBikeshed(document),
           unknownLinks: lists.unknown,
           knownLinks: lists.known,
-          deprecatedLinks: lists.deprecated
+          deprecatedLinks: lists.deprecated,
+          htmlLinks: lists.html
         });
         res.send(outputHTML);
       }).catch(e => {
