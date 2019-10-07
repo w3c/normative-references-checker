@@ -2,7 +2,7 @@ const express = require("express");
 const io = require("io-promise");
 const t0 = Date.now();
 
-const monitor  = require('./monitor.js');
+const monitor  = require('./lib/monitor.js');
 let app = module.exports = express();
 const jsdom = require("jsdom");
 const links = require("./lib/links.js");
@@ -115,7 +115,7 @@ app.get('/check', function (req, res, next) {
         if (e.statusCode) {
           status = e.statusCode;
         }
-        console.error(e);
+        monitor.error(e);
         errArgs(status + " " + e.name + ": " + inputURL);
         res.status(status)
            .send("<html><title>Error</title><h1>Error " + status + "</h1>"
@@ -132,10 +132,11 @@ monitor.stats(app);
 
 let port = process.env.PORT || 5000;
 
-app.listen(port, function() {
-
-    console.log("Express server listening on port %d in %s mode", port, app.settings.env);
-
-    console.log("App started in", (Date.now() - t0) + "ms.");
-
+/* eslint-disable no-console */
+app.listen(port, () => {
+  console.log("Express server listening on port %d in %s mode", port, process.env.NODE_ENV);
+  console.log("App started in", (Date.now() - t0) + "ms.");
+  monitor.log("Express server listening on port " + port + " in " + process.env.NODE_ENV + " mode");
+  monitor.log("App started in " + (Date.now() - t0) + "ms.");
 });
+/* eslint-enable no-console */
