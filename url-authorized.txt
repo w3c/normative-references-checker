@@ -6,4 +6,5 @@
 ^https?://rawgit.com/
 ^https?://drafts.csswg.org/
 ^https?://drafts.fxtf.org/
+^https?://pr-preview.s3.amazonaws.com/
 
