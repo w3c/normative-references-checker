@@ -1,6 +1,7 @@
 const express = require("express");
 const io = require("io-promise");
 const t0 = Date.now();
+const path = require('path');
 
 const monitor  = require('./lib/monitor.js');
 let app = module.exports = express();
@@ -14,7 +15,7 @@ let currentlyRunning = {};
 
 let AUTHORIZED_URLS = [];
 
-io.read("./url-authorized.txt").then(data => {
+io.read(path.resolve(__dirname, "./url-authorized.txt")).then(data => {
   data.split('\n').forEach(line => {
     if (!(line.charAt(0) === '#')) {
       line = line.trim();
@@ -23,6 +24,9 @@ io.read("./url-authorized.txt").then(data => {
       }
     }
   })
+}).catch(err => {
+  console.error(err);
+  monitor.error("Can't load authorized URLS");
 })
 function isAuthorized(url) {
   return AUTHORIZED_URLS.reduce((r, e) => r || e.test(url), false);
@@ -36,7 +40,7 @@ monitor.install(app);
 let FORM = null;
 app.get('/', function (req, res, next) {
   if (FORM === null) {
-    io.read('./docs/form.html').then(data => {
+    io.read(path.resolve(__dirname, './docs/form.html')).then(data => {
       FORM = data;
       res.send(FORM);
     }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
@@ -46,7 +50,7 @@ app.get('/', function (req, res, next) {
 });
 
 app.get('/doc', function (req, res, next) {
-  io.read('./docs/index.html').then(data => {
+  io.read(path.resolve(__dirname, './docs/index.html')).then(data => {
       res.send(data);
     }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
 });
