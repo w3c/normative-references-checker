@@ -3,6 +3,8 @@ const io = require("io-promise");
 const t0 = Date.now();
 const path = require('path');
 
+const config = require('./lib/config.js');
+
 const monitor  = require('./lib/monitor.js');
 let app = module.exports = express();
 const jsdom = require("jsdom");
@@ -15,7 +17,7 @@ let currentlyRunning = {};
 
 let AUTHORIZED_URLS = [];
 
-io.read(path.resolve(__dirname, "./url-authorized.txt")).then(data => {
+io.read(path.resolve(config.basedir, "url-authorized.txt")).then(data => {
   data.split('\n').forEach(line => {
     if (!(line.charAt(0) === '#')) {
       line = line.trim();
@@ -40,7 +42,7 @@ monitor.install(app);
 let FORM = null;
 app.get('/', function (req, res, next) {
   if (FORM === null) {
-    io.read(path.resolve(__dirname, './docs/form.html')).then(data => {
+    io.read(path.resolve(config.basedir, 'docs/form.html')).then(data => {
       FORM = data;
       res.send(FORM);
     }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
@@ -50,7 +52,7 @@ app.get('/', function (req, res, next) {
 });
 
 app.get('/doc', function (req, res, next) {
-  io.read(path.resolve(__dirname, './docs/index.html')).then(data => {
+  io.read(path.resolve(config.basedir, 'docs/index.html')).then(data => {
       res.send(data);
     }).catch(e => res.status(500).send("contact Starman. He is orbiting somewhere in space in his car."));
 });
@@ -134,13 +136,17 @@ app.get('/check', function (req, res, next) {
 
 monitor.stats(app);
 
-let port = process.env.PORT || 5000;
+if (!config.checkOptions("host", "port", "env")) {
+  console.error("Improper configuration. Not Starting");
+  return;
+}
 
 /* eslint-disable no-console */
-app.listen(port, () => {
-  console.log("Express server listening on port %d in %s mode", port, process.env.NODE_ENV);
-  console.log("App started in", (Date.now() - t0) + "ms.");
-  monitor.log("Express server listening on port " + port + " in " + process.env.NODE_ENV + " mode");
-  monitor.log("App started in " + (Date.now() - t0) + "ms.");
+app.listen(config.port, () => {
+  monitor.log(`Server started in ${Date.now() - t0}ms at http://${config.host}:${config.port}/`);
+  if (!config.debug && config.env != "production") {
+    monitor.warn("WARNING: 'export NODE_ENV=production' is missing");
+    monitor.warn("See http://expressjs.com/en/advanced/best-practice-performance.html#set-node_env-to-production");
+  }
 });
 /* eslint-enable no-console */
