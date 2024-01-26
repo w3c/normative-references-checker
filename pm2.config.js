@@ -5,14 +5,14 @@ module.exports = {
    */
   apps : [
     {
-      name      : 'normative-references',
+      name      : 'normative-references-checker',
       script    : 'serve.js',
       env: {
         NODE_ENV: 'production',
         PORT    : 5000
       },
-      error_file : "/var/log/nodejs/normative-references.err",
-      out_file   : "/var/log/nodejs/normative-references.log",
+      error_file : "/var/log/nodejs/normative-references-checker.err",
+      out_file   : "/var/log/nodejs/normative-references-checker.log",
       "node_args": "--max_old_space_size=400"
     }
   ]
