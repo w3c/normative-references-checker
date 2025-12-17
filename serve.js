@@ -93,7 +93,7 @@ app.get('/check', function (req, res, next) {
       }).then(document => {
         if (links.isRespec(document)) {
           isRespec = true;
-          inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
+          inputURL = "https://www.w3.org/publications/spec-generator/?type=respec&url=" + inputURL;
           monitor.log("spec-generator: " + inputURL);
           return JSDOM.fromURL(inputURL).then(dom => {
             return dom.window.document;

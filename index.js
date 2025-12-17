@@ -42,7 +42,7 @@ JSDOM.fromURL(inputURL).then(dom => {
 }).then(document => {
   let script = document.querySelector("script.remove");
   if (script !==  null) {
-    inputURL = "https://labs.w3.org/spec-generator/?type=respec&url=" + inputURL;
+    inputURL = "https://www.w3.org/publications/spec-generator/?type=respec&url=" + inputURL;
     return JSDOM.fromURL(inputURL).then(dom => {
       return dom.window.document;
     });
