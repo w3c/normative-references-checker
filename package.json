@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/plehegar/normative-references#readme",
   "dependencies": {
-    "express": "4.*.*",
+    "express": "5.*.*",
     "io-promise": "1.*.*",
-    "jsdom": "24.*.*"
+    "jsdom": "30.*.*"
   }
 }
